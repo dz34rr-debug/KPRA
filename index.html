@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rekap Kuantitatif Antibiotik - Edelweiss</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50 min-h-screen font-sans text-gray-800">
+    <!-- Navbar -->
+    <nav class="bg-blue-700 text-white p-4 shadow-md">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-bold"><i class="fas fa-hospital mr-2"></i> Form Kuantitatif Antibiotik - Ruang Edelweiss</h1>
+            <span class="text-sm bg-blue-800 px-3 py-1 rounded-full">RSUD Gambiran</span>
+        </div>
+    </nav>
+
+    <div class="container mx-auto p-4 mt-4 flex flex-col lg:flex-row gap-6">
+        <!-- Bagian Kiri: Form Input -->
+        <div class="lg:w-1/3 bg-white p-6 rounded-lg shadow-md border border-gray-200 h-fit">
+            <h2 class="text-lg font-bold text-gray-700 mb-4 border-b pb-2"><i class="fas fa-edit text-blue-600 mr-2"></i> Input Data Pasien</h2>
+            
+            <form id="rekapForm" class="space-y-4">
+                <!-- Data Edelweiss -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">NO RM</label>
+                        <input type="text" id="no_rm" class="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Kamar / Bed</label>
+                        <input type="text" id="kamar_bed" placeholder="VIP - Bed 3" class="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Nama Pasien</label>
+                    <input type="text" id="nama_pasien" class="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                </div>
+
+                <!-- Form Kuanti (Lama Rawat) -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Tanggal MRS</label>
+                        <input type="date" id="tgl_mrs" onchange="hitungLamaRawat()" class="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Tanggal KRS (Hari ini)</label>
+                        <input type="date" id="tgl_krs" onchange="hitungLamaRawat()" class="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
+
+                <div class="bg-gray-100 p-3 rounded text-center">
+                    <span class="block text-xs font-bold text-gray-500">LAMA RAWAT INAP (HARI)</span>
+                    <span id="lama_rawat" class="text-2xl font-bold text-blue-700">0</span>
+                </div>
+
+                <!-- Data Kuantitatif Antibiotik -->
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Jenis Antibiotik</label>
+                    <select id="jenis_antibiotik" class="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        <option value="">-- Pilih Antibiotik --</option>
+                        <option value="AMIKACIN">AMIKACIN</option>
+                        <option value="AMOXICILLIN">AMOXICILLIN</option>
+                        <option value="AMPICILLIN">AMPICILLIN</option>
+                        <option value="AMPICILLIN SULBACTAM">AMPICILLIN SULBACTAM</option>
+                        <option value="AMOXICILLIN CLAVULANATE">AMOXICILLIN CLAVULANATE</option>
+                        <option value="AZITHROMYCIN">AZITHROMYCIN</option>
+                        <option value="CEFADROXIL">CEFADROXIL</option>
+                        <option value="CEFAZOLIN">CEFAZOLIN</option>
+                        <option value="CEFIXIME">CEFIXIME</option>
+                        <option value="CEFOTAXIME">CEFOTAXIME</option>
+                        <option value="CEFTAZIDIME">CEFTAZIDIME</option>
+                        <option value="CEFTRIAXONE">CEFTRIAXONE</option>
+                        <option value="CEFUROXIME">CEFUROXIME</option>
+                        <option value="CIPROFLOXACIN">CIPROFLOXACIN</option>
+                        <option value="CLINDAMYCIN">CLINDAMYCIN</option>
+                        <option value="COTRIMOXAZOLE">COTRIMOXAZOLE</option>
+                        <option value="GENTAMICIN">GENTAMICIN</option>
+                        <option value="LEVOFLOXACIN">LEVOFLOXACIN</option>
+                        <option value="MEROPENEM">MEROPENEM</option>
+                        <option value="METRONIDAZOLE">METRONIDAZOLE</option>
+                    </select>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Total (Gram)</label>
+                        <input type="number" step="0.01" id="total_gram" class="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">KSM / DPJP</label>
+                        <input type="text" id="ksm" placeholder="KSM IPD" class="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Apoteker (APT)</label>
+                    <input type="text" id="apoteker" value="DEVI ARISTANTI" class="w-full border rounded px-3 py-2 text-sm bg-gray-100 font-semibold focus:outline-none" required>
+                </div>
+
+                <button type="button" onclick="tambahData()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-200 mt-2">
+                    <i class="fas fa-plus mr-1"></i> Tambah ke Tabel
+                </button>
+            </form>
+        </div>
+
+        <!-- Bagian Kanan: Tabel Data -->
+        <div class="lg:w-2/3 bg-white p-6 rounded-lg shadow-md border border-gray-200">
+            <div class="flex justify-between items-center mb-4 border-b pb-2">
+                <h2 class="text-lg font-bold text-gray-700"><i class="fas fa-table text-blue-600 mr-2"></i> Rekap Data Kuantitatif</h2>
+                <button onclick="exportKeExcel()" class="bg-green-600 hover:bg-green-700 text-white text-sm font-bold py-2 px-4 rounded transition duration-200">
+                    <i class="fas fa-file-excel mr-1"></i> Export Excel
+                </button>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm text-left text-gray-600" id="tabelData">
+                    <thead class="text-xs text-white bg-blue-600">
+                        <tr>
+                            <th class="px-3 py-2 rounded-tl">NO</th>
+                            <th class="px-3 py-2">NO RM</th>
+                            <th class="px-3 py-2">NAMA PASIEN</th>
+                            <th class="px-3 py-2 text-center">LAMA RAWAT (HARI)</th>
+                            <th class="px-3 py-2">JENIS ANTIBIOTIK</th>
+                            <th class="px-3 py-2 text-center">TOTAL (GRAM)</th>
+                            <th class="px-3 py-2">KSM</th>
+                            <th class="px-3 py-2 rounded-tr">AKSI</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabelBody" class="bg-white divide-y divide-gray-200">
+                        <!-- Data akan masuk ke sini -->
+                    </tbody>
+                </table>
+                <div id="emptyState" class="text-center py-8 text-gray-400">
+                    <i class="fas fa-folder-open text-4xl mb-2"></i>
+                    <p>Belum ada data pasien yang direkap.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let dataPasien = [];
+        let nomorUrut = 1;
+
+        // Set default KRS ke hari ini
+        document.getElementById('tgl_krs').valueAsDate = new Date();
+
+        // Fungsi menghitung lama rawat inap
+        function hitungLamaRawat() {
+            const mrs = new Date(document.getElementById('tgl_mrs').value);
+            const krs = new Date(document.getElementById('tgl_krs').value);
+            
+            if(!isNaN(mrs) && !isNaN(krs)) {
+                // Selisih dalam milidetik diubah ke hari
+                const selisih = Math.ceil((krs - mrs) / (1000 * 60 * 60 * 24));
+                // Minimal 1 hari meskipun KRS di hari yang sama
+                const lamaRawat = selisih < 1 ? 1 : selisih; 
+                document.getElementById('lama_rawat').innerText = lamaRawat;
+            }
+        }
+
+        function tambahData() {
+            // Ambil nilai input
+            const no_rm = document.getElementById('no_rm').value;
+            const nama = document.getElementById('nama_pasien').value;
+            const lama_rawat = document.getElementById('lama_rawat').innerText;
+            const jenis_ab = document.getElementById('jenis_antibiotik').value;
+            const total_gram = document.getElementById('total_gram').value;
+            const ksm = document.getElementById('ksm').value;
+            const apt = document.getElementById('apoteker').value;
+
+            if(!no_rm || !nama || !jenis_ab || !total_gram || !ksm) {
+                alert("Harap lengkapi semua data wajib (No RM, Nama, Antibiotik, Total, KSM).");
+                return;
+            }
+
+            // Simpan ke array
+            const dataBaru = {
+                "NO": nomorUrut,
+                "NO RM": no_rm,
+                "NAMA PASIEN": nama,
+                "LAMA RAWAT INAP (HARI)": parseInt(lama_rawat),
+                "JENIS ANTIBIOTIK": jenis_ab,
+                "TOTAL PEMAKAIAN (GRAM)": parseFloat(total_gram),
+                "KSM": ksm,
+                "APT": apt
+            };
+
+            dataPasien.push(dataBaru);
+            nomorUrut++;
+
+            renderTabel();
+            
+            // Kosongkan beberapa field untuk pasien berikutnya (tapi biarkan RM jika pasien sama beda obat)
+            document.getElementById('jenis_antibiotik').value = "";
+            document.getElementById('total_gram').value = "";
+        }
+
+        function hapusData(index) {
+            dataPasien.splice(index, 1);
+            renderTabel();
+        }
+
+        function renderTabel() {
+            const tbody = document.getElementById('tabelBody');
+            const emptyState = document.getElementById('emptyState');
+            
+            tbody.innerHTML = "";
+
+            if (dataPasien.length > 0) {
+                emptyState.style.display = 'none';
+            } else {
+                emptyState.style.display = 'block';
+            }
+
+            dataPasien.forEach((data, index) => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-gray-50";
+                tr.innerHTML = `
+                    <td class="px-3 py-3 font-semibold">${data['NO']}</td>
+                    <td class="px-3 py-3">${data['NO RM']}</td>
+                    <td class="px-3 py-3 font-medium text-gray-900">${data['NAMA PASIEN']}</td>
+                    <td class="px-3 py-3 text-center">
+                        <span class="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-1 rounded">${data['LAMA RAWAT INAP (HARI)']}</span>
+                    </td>
+                    <td class="px-3 py-3">${data['JENIS ANTIBIOTIK']}</td>
+                    <td class="px-3 py-3 text-center font-bold text-gray-700">${data['TOTAL PEMAKAIAN (GRAM)']}</td>
+                    <td class="px-3 py-3">${data['KSM']}</td>
+                    <td class="px-3 py-3 text-center">
+                        <button onclick="hapusData(${index})" class="text-red-500 hover:text-red-700 transition">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function exportKeExcel() {
+            if (dataPasien.length === 0) {
+                alert("Tabel masih kosong. Tambahkan data terlebih dahulu.");
+                return;
+            }
+
+            // Memformat data agar sesuai dengan struktur Excel Form Kuanti
+            const dataExport = dataPasien.map(d => {
+                return {
+                    "NO": d["NO"],
+                    "NO RM": d["NO RM"],
+                    "LAMA RAWAT INAP (HARI)": d["LAMA RAWAT INAP (HARI)"],
+                    "JENIS ANTIBIOTIK": d["JENIS ANTIBIOTIK"],
+                    "TOTAL PEMAKAIAN (GRAM)": d["TOTAL PEMAKAIAN (GRAM)"],
+                    "KSM": d["KSM"],
+                    "APT": d["APT"],
+                    "NOTES:": "" // Kolom tambahan dari form kuanti
+                }
+            });
+
+            // Buat worksheet dari array objek JSON
+            const ws = XLSX.utils.json_to_sheet(dataExport);
+            
+            // Styling lebar kolom
+            ws['!cols'] = [
+                { wch: 5 },  // NO
+                { wch: 10 }, // NO RM
+                { wch: 25 }, // LAMA RAWAT INAP (HARI)
+                { wch: 25 }, // JENIS ANTIBIOTIK
+                { wch: 25 }, // TOTAL PEMAKAIAN (GRAM)
+                { wch: 15 }, // KSM
+                { wch: 20 }, // APT
+                { wch: 30 }  // NOTES
+            ];
+
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Rekap_Kuanti");
+            
+            // Simpan file
+            XLSX.writeFile(wb, "Form_Kuanti_Edelweiss.xlsx");
+        }
+    </script>
+</body>
+</html>
